@@ -46,7 +46,7 @@ public class FilterTransactions extends Dto {
      */
     @Override
     public Map<String, String> getValues() {
-        HashMap<String, String> result = new HashMap<>();
+        HashMap<String, String> result = new HashMap<String, String>();
         
         if (Status != null && !Status.isEmpty()) result.put("Status", Status);
         if (Type != null && !Type.isEmpty()) result.put("Type", Type);

@@ -29,7 +29,7 @@ public abstract class EntityBase extends Dto {
     @Override
     public ArrayList<String> getReadOnlyProperties() {
         
-        ArrayList<String> result = new ArrayList<>();
+        ArrayList<String> result = new ArrayList<String>();
         
         result.add("Id");
         result.add("CreationDate");

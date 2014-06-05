@@ -98,7 +98,7 @@ public class CardPreAuthorization extends EntityBase {
     @Override
     public Map<String, Type> getSubObjects() {
         
-        HashMap<String, Type> result = new HashMap<>();
+        HashMap<String, Type> result = new HashMap<String, Type>();
         
         result.put("DebitedFunds", Money.class);
         

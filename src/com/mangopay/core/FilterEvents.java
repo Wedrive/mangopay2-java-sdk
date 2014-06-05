@@ -29,7 +29,7 @@ public class FilterEvents extends Dto {
      */
     @Override
     public Map<String, String> getValues() {
-        HashMap<String, String> result = new HashMap<>();
+        HashMap<String, String> result = new HashMap<String, String>();
         
         if (Type != EventType.ALL) {
             result.put("eventtype", Type.name());

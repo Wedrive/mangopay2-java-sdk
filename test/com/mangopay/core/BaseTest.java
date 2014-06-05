@@ -2,6 +2,7 @@ package com.mangopay.core;
 
 import com.mangopay.*;
 import com.mangopay.entities.*;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -13,11 +14,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+
 import static org.junit.Assert.*;
 
 @Ignore("Just a base class for tests: nothing to test here")
@@ -160,7 +163,7 @@ public abstract class BaseTest {
             UserNatural john = this.getJohn();
             
             Wallet wallet = new Wallet();
-            wallet.Owners = new ArrayList<>();
+            wallet.Owners = new ArrayList<String>();
             wallet.Owners.add(john.Id);
             
             wallet.Currency = "EUR";
@@ -198,7 +201,7 @@ public abstract class BaseTest {
             
             // create wallet with money
             Wallet wallet = new Wallet();
-            wallet.Owners = new ArrayList<>();
+            wallet.Owners = new ArrayList<String>();
             wallet.Owners.add(john.Id);
             wallet.Currency = "EUR";
             wallet.Description = "WALLET IN EUR WITH MONEY";
@@ -417,7 +420,7 @@ public abstract class BaseTest {
         UserNatural user = this.getJohn();
 
         Wallet wallet = new Wallet();
-        wallet.Owners = new ArrayList<>();
+        wallet.Owners = new ArrayList<String>();
         wallet.Owners.add(user.Id);
         wallet.Currency = "EUR";
         wallet.Description = "WALLET IN EUR FOR TRANSFER";
@@ -554,9 +557,14 @@ public abstract class BaseTest {
         connection.setDoInput(true);
         connection.setDoOutput(true);
         
-        try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+        DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+        try {
             wr.writeBytes(data);
             wr.flush ();
+        } finally {
+        	if (wr != null) {
+        		wr.close();
+        	}
         }
         
         int responseCode = connection.getResponseCode();
@@ -568,12 +576,15 @@ public abstract class BaseTest {
         }
 
         StringBuffer resp;
-        try (BufferedReader rd = new BufferedReader(new InputStreamReader(is))) {
+        BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+        try {
             String line;
             resp = new StringBuffer();
             while((line = rd.readLine()) != null) {
                 resp.append(line);
             }
+        } finally {
+        	if (rd != null) rd.close();
         }
         String responseString = resp.toString();
         

@@ -38,7 +38,7 @@ public class PayInPaymentDetailsBankWire extends Dto implements IPayInPaymentDet
     @Override
     public Map<String, Type> getSubObjects() {
         
-        HashMap<String, Type> result = new HashMap<>();
+        HashMap<String, Type> result = new HashMap<String, Type>();
         
         result.put("DeclaredDebitedFunds", Money.class);
         result.put("DeclaredFees", Money.class);

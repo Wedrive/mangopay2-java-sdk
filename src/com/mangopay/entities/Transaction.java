@@ -74,7 +74,7 @@ public class Transaction extends EntityBase {
     @Override
     public Map<String, Type> getSubObjects() {
         
-        HashMap<String, Type> result = new HashMap<>();
+        HashMap<String, Type> result = new HashMap<String, java.lang.reflect.Type>();
         
         result.put("DebitedFunds", Money.class);
         result.put("CreditedFunds", Money.class);

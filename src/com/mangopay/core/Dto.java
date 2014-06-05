@@ -15,25 +15,25 @@ public abstract class Dto {
      * To be overridden in child class if has any sub objects.
      * @return Collection of field name-field type pairs.
      */
-    public Map<String, Type> getSubObjects() { return new HashMap<>(); }
+    public Map<String, Type> getSubObjects() { return new HashMap<String, Type>(); }
 
     /**
      * Gets the structure that maps which property depends on other property.
      * To be overridden in child class if has any dependent objects.
      * @return 
      */
-    public Map<String, Map<String, Map<String, Class<?>>>> getDependentObjects() { return new HashMap<>(); }
+    public Map<String, Map<String, Map<String, Class<?>>>> getDependentObjects() { return new HashMap<String, Map<String, Map<String, Class<?>>>>(); }
     
     /**
      * Gets map of fields and values.
      * @return Collection of field name-field value pairs.
      */
-    public Map<String, String> getValues() { return new HashMap<>(); }
+    public Map<String, String> getValues() { return new HashMap<String, String>(); }
     
     /**
      * Gets the collection of read-only fields names
      * @return List of field names.
      */
-    public ArrayList<String> getReadOnlyProperties() { return new ArrayList<>(); }
+    public ArrayList<String> getReadOnlyProperties() { return new ArrayList<String>(); }
     
 }

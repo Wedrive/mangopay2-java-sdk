@@ -107,7 +107,7 @@ public class RestTool {
     public void addRequestHttpHeader(Map<String, String> httpHeader) {
         
         if (this._requestHttpHeaders == null)
-            this._requestHttpHeaders = new HashMap<>();
+            this._requestHttpHeaders = new HashMap<String, String>();
         
         this._requestHttpHeaders.putAll(httpHeader);
     }    
@@ -394,15 +394,19 @@ public class RestTool {
                     Logs.debug("RequestBody", requestBody);
                 }
                 
-                try (OutputStreamWriter osw = new OutputStreamWriter(_connection.getOutputStream(), "UTF-8")) {
-                    osw.write(requestBody);
-                    osw.flush ();
-                }
-                
-//                try (DataOutputStream wr = new DataOutputStream(_connection.getOutputStream())) {
-//                    wr.writeBytes(requestBody);
-//                    wr.flush ();
+                // TODO Java 6 replacement
+//                try (OutputStreamWriter osw = new OutputStreamWriter(_connection.getOutputStream(), "UTF-8")) {
+//                    osw.write(requestBody);
+//                    osw.flush ();
 //                }
+                OutputStreamWriter osw = new OutputStreamWriter(_connection.getOutputStream(), "UTF-8");
+                try {
+                	osw.write(requestBody);
+                	osw.flush ();
+                } finally {
+                	if (osw != null) osw.close();
+                }
+                // TODO End replacement
             }
             
 
@@ -416,13 +420,25 @@ public class RestTool {
             }
             
             StringBuffer resp;
-            try (BufferedReader rd = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
-                String line;
-                resp = new StringBuffer();
-                while((line = rd.readLine()) != null) {
-                    resp.append(line);
-                }
-            }
+//          try (BufferedReader rd = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
+//          String line;
+//          resp = new StringBuffer();
+//          while((line = rd.readLine()) != null) {
+//              resp.append(line);
+//          }
+//      }
+      // TODO Java 6 replacement
+      BufferedReader rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+      try {
+          String line;
+          resp = new StringBuffer();
+          while((line = rd.readLine()) != null) {
+              resp.append(line);
+          }
+      } finally {
+          if (rd != null) rd.close();
+      }
+      // TODO End replacement
             String responseString = resp.toString();
             
             if (this._debugMode) {
@@ -505,7 +521,7 @@ public class RestTool {
      * @return 
      */
     private <T extends Dto> HashMap<String, Object> buildRequestData(Class<T> classOfT, T entity) {
-        HashMap<String, Object> result = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<String, Object>();
         
         ArrayList<String> readOnlyProperties = entity.getReadOnlyProperties();
         
@@ -533,13 +549,21 @@ public class RestTool {
             
             
             if (canReadSubRequestData(classOfT, fieldName)) {
-                HashMap<String, Object> subRequestData = new HashMap<>();
+                HashMap<String, Object> subRequestData = new HashMap<String, Object>();
                 
                 try {
                     Method m = RestTool.class.getDeclaredMethod("buildRequestData", Class.class, Dto.class);
                     subRequestData = (HashMap<String, Object>)m.invoke(this, f.getType(), f.get(entity));
-                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                } catch (NoSuchMethodException ex) {
                     Logger.getLogger(RestTool.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SecurityException ex) {
+                	Logger.getLogger(RestTool.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                	Logger.getLogger(RestTool.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                	Logger.getLogger(RestTool.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InvocationTargetException ex) {
+                	Logger.getLogger(RestTool.class.getName()).log(Level.SEVERE, null, ex);
                 }
                     
                 for (Entry<String, Object> e : subRequestData.entrySet()) {
@@ -553,7 +577,9 @@ public class RestTool {
                     else {
                         result.put(fieldName, ((List)f.get(entity)).toArray());
                     }
-                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                } catch (IllegalArgumentException ex) {
+                    continue;
+                } catch (IllegalAccessException ex) {
                     continue;
                 }
             }
@@ -624,15 +650,12 @@ public class RestTool {
                 for (Entry<String, JsonElement> entry : response.entrySet()) {
                     
                     if (entry.getKey().equals("PersonType")) {
-                        switch (entry.getValue().getAsString()) {
-                            case User.Types.Natural:
-                                result = (T) new UserNatural();
-                                break;
-                            case User.Types.Legal:
-                                result = (T) new UserLegal();
-                                break;
-                            default:
-                                throw new Exception(String.format("Unknown type of user: %s", entry.getValue().getAsString()));
+                        if (User.Types.Natural.equals(entry.getValue().getAsString())) {
+                        	result = (T) new UserNatural();
+                        }else if (User.Types.Legal.equals(entry.getValue().getAsString())) {
+                        	result = (T) new UserLegal();
+                        } else {
+                        	throw new Exception(String.format("Unknown type of user: %s", entry.getValue().getAsString()));
                         }
                     }
                     
@@ -801,7 +824,7 @@ public class RestTool {
      */
     private <T extends Dto> List<T> doRequestList(Class<T[]> classOfT, Class<T> classOfTItem, String urlMethod, Pagination pagination, Map<String, String> additionalUrlParams) throws Exception {
         
-        List<T> response = new ArrayList<>();
+        List<T> response = new ArrayList<T>();
         
         try {
             UrlTool urlTool = new UrlTool(_root);
@@ -848,9 +871,16 @@ public class RestTool {
                 }
                 requestBody = params.replaceFirst("&", "");
                 
-                try (DataOutputStream wr = new DataOutputStream (_connection.getOutputStream())) {
-                    wr.writeBytes(requestBody);
-                    wr.flush();
+//              try (DataOutputStream wr = new DataOutputStream (_connection.getOutputStream())) {
+//              wr.writeBytes(requestBody);
+//              wr.flush();
+//          }
+                DataOutputStream wr = new DataOutputStream (_connection.getOutputStream());
+                try {
+                	wr.writeBytes(requestBody);
+                	wr.flush();
+                } finally {
+                	if (wr != null) wr.close();
                 }
 
                 if (this._debugMode) {
@@ -870,14 +900,26 @@ public class RestTool {
             }
             
             StringBuffer resp;
-            try (BufferedReader rd = new BufferedReader(new InputStreamReader(is))) {
-                String line;
-                resp = new StringBuffer();
-                while((line = rd.readLine()) != null) {
-                    resp.append(line);
-                    resp.append('\r');
-                }
+//          try (BufferedReader rd = new BufferedReader(new InputStreamReader(is))) {
+//          String line;
+//          resp = new StringBuffer();
+//          while((line = rd.readLine()) != null) {
+//              resp.append(line);
+//              resp.append('\r');
+//          }
+//      }
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+            try {
+            	String line;
+            	resp = new StringBuffer();
+            	while((line = rd.readLine()) != null) {
+            		resp.append(line);
+            		resp.append('\r');
+            	}
+            } finally {
+            	if (rd != null) rd.close();
             }
+
             String responseString = resp.toString();
             
             if (this._debugMode) {
@@ -930,7 +972,7 @@ public class RestTool {
                 return this._requestHttpHeaders;
         
         // ...or initialize with default headers
-        Map<String, String> httpHeaders = new HashMap<>();
+        Map<String, String> httpHeaders = new HashMap<String, String>();
         
         // content type
         httpHeaders.put("Content-Type", "application/json");
